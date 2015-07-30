@@ -17,16 +17,22 @@ typedef struct trainingnn_data
 	int num_inputs;
 	uchar *inputs;
 	uchar outputs;
+	SamplingRegion *region;
 } TrainingNNData;
 
-TrainingNNData *TrainingNNDataCreate(int num_inputs);
-void TrainingNNDataSetInputValue(TrainingNNData *tdata, SamplingRegion *region, IplImage *in);
-void TrainingNNDataSetOutput(TrainingNNData *tdata, SamplingRegion *region, IplImage *out);
+TrainingNNData *TrainingNNDataCreate(int num_inputs, SamplingRegion *region);
+void TrainingNNDataSetInputValue(TrainingNNData *tdata, IplImage *in);
+void TrainingNNDataSetOutput(TrainingNNData *tdata, IplImage *out);
 void TrainingNNDataDestroy(TrainingNNData **tdata);
 
 typedef struct trainingnn
 {
+	int num_images;
+	IplImage **img_in, **img_out;
+	int num_image_by_sample;
 	TrainingNNData **trainings;
-} TrainningNN;
+} TrainingNN;
+
+TrainingNN *TrainingNNCreate();
 
 #endif /* TRAININGNN_H_ */
