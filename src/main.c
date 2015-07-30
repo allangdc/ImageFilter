@@ -4,8 +4,8 @@
 
 #include "sampling.h"
 
-#define FILE_IN "/home/allan/Imagens/Filter/i_002.png"
-#define FILE_OUT "/home/allan/Imagens/Filter/o_002.png"
+#define FILE_IN  "/home/allan/Imagens/floresta.jpg"   //"/home/allan/Imagens/Filter/i_002.png"
+#define FILE_OUT "/home/allan/Imagens/floresta.jpg"  //"/home/allan/Imagens/Filter/o_002.png"
 
 void ShowImage(IplImage *image, const char *title) {
 	cvNamedWindow(title, CV_WINDOW_AUTOSIZE);

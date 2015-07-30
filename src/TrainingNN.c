@@ -48,3 +48,56 @@ void TrainingNNDataDestroy(TrainingNNData **tdata)
 	free(tdata);
 	tdata = NULL;
 }
+
+TrainingNN *TrainingNNCreate(int num_images, int sample_per_images)
+{
+	int i;
+	TrainingNN *t = (TrainingNN *) malloc(sizeof(TrainingNN));
+	t->num_images = num_images;
+	t->num_sample_per_images = sample_per_images;
+	t->img_in = (IplImage **) malloc(sizeof(IplImage *) * num_images);
+	t->img_out = (IplImage **) malloc(sizeof(IplImage *) * num_images);
+	t->trainings = (TrainingNNData **) malloc(sizeof(TrainingNNData *) * num_images * sample_per_images);
+	for(i=0; i<num_images; i++)
+	{
+		int j;
+		*(t->img_in + i) = NULL;
+		*(t->img_out + i) = NULL;
+		for(j=0; j<sample_per_images; j++)
+		{
+			*(t->trainings + j) = NULL;
+		}
+	}
+	return t;
+}
+
+/**
+  * @todo is missing destroy 'trainnings' variable;
+  */
+void TrainingNNDestroy(TrainingNN **trainning)
+{
+	int i;
+	for(i=0; i<(*trainning)->num_images; i++)
+	{
+		IplImage *img_in = *((*trainning)->img_in + i);
+		IplImage *img_out = *((*trainning)->img_out + i);
+		if(img_in)
+		{
+			free(img_in);
+			*((*trainning)->img_in + i) = NULL;
+		}
+		if(img_out)
+		{
+			free(img_out);
+			*((*trainning)->img_out + i) = NULL;
+		}
+	}
+	free((*trainning)->img_in);
+	(*trainning)->img_in = NULL;
+	free((*trainning)->img_out);
+	(*trainning)->img_out = NULL;
+
+	free(*trainning);
+	*trainning = NULL;
+}
+

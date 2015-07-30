@@ -29,10 +29,11 @@ typedef struct trainingnn
 {
 	int num_images;
 	IplImage **img_in, **img_out;
-	int num_image_by_sample;
+	int num_sample_per_images;
 	TrainingNNData **trainings;
 } TrainingNN;
 
-TrainingNN *TrainingNNCreate();
+TrainingNN *TrainingNNCreate(int num_images, int sample_per_images);
+void TrainingNNDestroy(TrainingNN **trainning);
 
 #endif /* TRAININGNN_H_ */
