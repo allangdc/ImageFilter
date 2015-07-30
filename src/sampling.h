@@ -11,7 +11,7 @@ typedef struct samplingregion
 	int updated;
 } SamplingRegion;
 
-SamplingRegion *SamplingRegionCreate();
+SamplingRegion *SamplingRegionCreate(SamplingRegion *sample_allocated);
 void SampleRegionDestroy(SamplingRegion **sample);
 void SampleRegionSetPoint(SamplingRegion *sampling, int x, int y);
 void SampleRegionSetSquareSize(SamplingRegion *sampling, int side_size);
