@@ -71,14 +71,13 @@ TrainingNN *TrainingNNCreate(int num_images, int sample_per_images)
 	return t;
 }
 
-/**
-  * @todo is missing destroy 'trainnings' variable;
-  */
 void TrainingNNDestroy(TrainingNN **trainning)
 {
-	int i;
+	int i, count;
+	count=0;
 	for(i=0; i<(*trainning)->num_images; i++)
 	{
+		int j;
 		IplImage *img_in = *((*trainning)->img_in + i);
 		IplImage *img_out = *((*trainning)->img_out + i);
 		if(img_in)
@@ -91,7 +90,15 @@ void TrainingNNDestroy(TrainingNN **trainning)
 			free(img_out);
 			*((*trainning)->img_out + i) = NULL;
 		}
+		for(j=0; j<(*trainning)->num_sample_per_images; j++)
+		{
+			free( *((*trainning)->trainings + count) );
+			*((*trainning)->trainings + count) = NULL;
+			count++;
+		}
 	}
+	free((*trainning)->trainings);
+	(*trainning)->trainings = NULL;
 	free((*trainning)->img_in);
 	(*trainning)->img_in = NULL;
 	free((*trainning)->img_out);
