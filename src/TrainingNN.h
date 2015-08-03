@@ -35,5 +35,6 @@ typedef struct trainingnn
 
 TrainingNN *TrainingNNCreate(int num_images, int sample_per_images);
 void TrainingNNDestroy(TrainingNN **trainning);
+void TrainingNNGenerate(TrainingNN *training);
 
 #endif /* TRAININGNN_H_ */
