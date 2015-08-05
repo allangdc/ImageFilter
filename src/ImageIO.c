@@ -43,13 +43,15 @@ void ImageIOSaltEffect(IplImage *src, IplImage *dst, double percent)
 	int range_noise = (double) total * percent;
 	int i;
 	srand(time(NULL));
+	printf("Aqui 2\n");
+	//dst = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, src->nChannels);
 	for(i=0; i<range_noise; i++)
 	{
 		int ch;
 		CvPoint pt = cvPoint(rand()%src->height, rand()%src->width);
 		for(ch=0; ch<src->nChannels; ch++)
 		{
-			CV_MAT_ELEM(dst, uchar, pt.y, pt.x*src->nChannels + ch) = (uchar) (rand()%256);
+			CV_IMAGE_ELEM(src, uchar, pt.x, pt.y*src->nChannels + ch) = 6;
 		}
 	}
 }
