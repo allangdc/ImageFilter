@@ -34,26 +34,46 @@ void ImageIODestroy(ImageIO **imageio)
 
 void ImageIOSetImage(ImageIO *imageio, IplImage *img)
 {
-	imageio->out = img;
+	if(imageio->out)
+	{
+		free(imageio->in);
+		imageio->in = NULL;
+	}
+	imageio->in = cvCloneImage(img);
 }
 
-void ImageIOSaltEffect(IplImage *src, IplImage *dst, double percent)
+void ImageIOSaltEffect(IplImage *src, IplImage **dst, double percent)
 {
 	int total = src->width * src->height;
 	int range_noise = (double) total * percent;
+	printf("Total=%d, range_noise=%d", total, range_noise);
 	int i;
 	srand(time(NULL));
-	printf("Aqui 2\n");
+	if(*dst)
+	{
+		free(*dst);
+		*dst = NULL;
+	}
+	else
+	{
+		//*dst = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, src->nChannels);
+		*dst = cvCloneImage(src);
+	}
 	//dst = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, src->nChannels);
 	for(i=0; i<range_noise; i++)
 	{
 		int ch;
-		CvPoint pt = cvPoint(rand()%src->height, rand()%src->width);
-		for(ch=0; ch<src->nChannels; ch++)
+		CvPoint pt = cvPoint(rand()%(*dst)->height, rand()%(*dst)->width);
+		for(ch=0; ch<(*dst)->nChannels; ch++)
 		{
-			CV_IMAGE_ELEM(src, uchar, pt.x, pt.y*src->nChannels + ch) = 6;
+			CV_IMAGE_ELEM(*dst, uchar, pt.x, pt.y*(*dst)->nChannels + ch) = rand()%256;
 		}
 	}
 }
 
-//void ImageIOGenerate(ImageIO *imageio);
+void ImageIOGenerate(ImageIO *imageio)
+{
+	ImageIOSaltEffect(imageio->in, &(imageio->out), 0.1);
+}
+
+
