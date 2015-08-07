@@ -7,7 +7,7 @@
 SamplingRegion *SamplingRegionCreate(SamplingRegion *sample_allocated)
 {
 	SamplingRegion *sample;
-	if(sample_allocated == NULL) {
+	if(sample_allocated != NULL) {
 		sample = sample_allocated;
 	}
 	else
@@ -52,7 +52,7 @@ CvRect SampleRegionGetRegion(SamplingRegion *sampling)
 	return sampling->region;
 }
 
-IplImage *SampleRegionGetImageRegion(IplImage *src, SamplingRegion *sampling)
+IplImage *SampleRegionGetImageRegion(SamplingRegion *sampling, IplImage *src)
 {
 	IplImage *image = NULL;
 	CvRect region = SampleRegionGetRegion(sampling);

@@ -36,10 +36,10 @@ void ImageIOSetImage(ImageIO *imageio, IplImage *img)
 {
 	if(imageio->out)
 	{
-		cvReleaseImage(&imageio->in);
-		imageio->in = NULL;
+		cvReleaseImage(&imageio->out);
+		imageio->out = NULL;
 	}
-	imageio->in = cvCloneImage(img);
+	imageio->out = cvCloneImage(img);
 }
 
 void ImageIOSaltEffect(IplImage *src, IplImage **dst, double percent)
@@ -73,8 +73,8 @@ void ImageIOSaltEffect(IplImage *src, IplImage **dst, double percent)
 
 void ImageIOGenerate(ImageIO *imageio)
 {
-	ImageIOSaltEffect(imageio->in, &(imageio->out), 0.01);
-	cvSmooth(imageio->out, imageio->out, CV_BLUR, 5, 5, 0, 0);
+	ImageIOSaltEffect(imageio->out, &(imageio->in), 0.01);
+	cvSmooth(imageio->in, imageio->in, CV_BLUR, 5, 5, 0, 0);
 }
 
 

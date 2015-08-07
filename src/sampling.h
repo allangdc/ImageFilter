@@ -16,7 +16,7 @@ void SampleRegionDestroy(SamplingRegion **sample);
 void SampleRegionSetPoint(SamplingRegion *sampling, int x, int y);
 void SampleRegionSetSquareSize(SamplingRegion *sampling, int side_size);
 CvRect SampleRegionGetRegion(SamplingRegion *sampling);
-IplImage *SampleRegionGetImageRegion(IplImage *src, SamplingRegion *sampling);
+IplImage *SampleRegionGetImageRegion(SamplingRegion *sampling, IplImage *src);
 uchar *SampleRegionGenerateVector(IplImage *image);
 
 void PrintImage(const IplImage *image, int channel);
