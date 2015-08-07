@@ -19,12 +19,12 @@ void ImageIODestroy(ImageIO **imageio)
 	{
 		if((*imageio)->in)
 		{
-			free((*imageio)->in);
+			cvReleaseImage(&(*imageio)->in);
 			(*imageio)->in = NULL;
 		}
 		if((*imageio)->out)
 		{
-			free((*imageio)->out);
+			cvReleaseImage(&(*imageio)->out);
 			(*imageio)->out = NULL;
 		}
 		free(*imageio);
@@ -36,7 +36,7 @@ void ImageIOSetImage(ImageIO *imageio, IplImage *img)
 {
 	if(imageio->out)
 	{
-		free(imageio->in);
+		cvReleaseImage(&imageio->in);
 		imageio->in = NULL;
 	}
 	imageio->in = cvCloneImage(img);
@@ -51,7 +51,7 @@ void ImageIOSaltEffect(IplImage *src, IplImage **dst, double percent)
 	srand(time(NULL));
 	if(*dst)
 	{
-		free(*dst);
+		cvReleaseImage(dst);
 		*dst = NULL;
 	}
 	else
@@ -73,7 +73,8 @@ void ImageIOSaltEffect(IplImage *src, IplImage **dst, double percent)
 
 void ImageIOGenerate(ImageIO *imageio)
 {
-	ImageIOSaltEffect(imageio->in, &(imageio->out), 0.1);
+	ImageIOSaltEffect(imageio->in, &(imageio->out), 0.01);
+	cvSmooth(imageio->out, imageio->out, CV_BLUR, 5, 5, 0, 0);
 }
 
 

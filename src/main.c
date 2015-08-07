@@ -4,7 +4,7 @@
 
 #include "ImageIO.h"
 
-#define FILE_IN  "/home/allan/Documentos/repositorios/lsbd_release_v4.4.0/src/views/lsc_lite/Resources/Images/Icons/AAAicnLSCLite_256.png"   //"/home/allan/Imagens/Filter/i_002.png"
+#define FILE_IN  "/home/allan/Imagens/Filter/o_002.png"
 #define FILE_OUT FILE_IN  //"/home/allan/Imagens/Filter/o_002.png"
 
 void ShowImage(IplImage *image, const char *title) {
@@ -18,10 +18,8 @@ int main(int argc, char **argv) {
 	char *title_out = "Saida";
 
 	IplImage *img_in = cvLoadImage(FILE_IN, CV_LOAD_IMAGE_COLOR);
-	IplImage *img_out = cvLoadImage(FILE_OUT, CV_LOAD_IMAGE_COLOR);
 
-	ImageIO *imageio=NULL;
-	imageio = ImageIOCreate();
+	ImageIO *imageio = ImageIOCreate();
 	ImageIOSetImage(imageio, img_in);
 	cvReleaseImage(&img_in);
 	ImageIOGenerate(imageio);
@@ -29,6 +27,7 @@ int main(int argc, char **argv) {
 	ShowImage(imageio->out, "Arquivo");
 	cvWaitKey(0);
 
+	cvDestroyWindow("Arquivo");
 	ImageIODestroy(&imageio);
 
 	printf("\n\n ***FIM***\n");

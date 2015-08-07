@@ -1,6 +1,7 @@
 #include "sampling.h"
 
 #include <stdio.h>
+#include <time.h>
 #include <highgui.h>
 
 SamplingRegion *SamplingRegionCreate(SamplingRegion *sample_allocated)
@@ -112,3 +113,4 @@ uchar *SampleRegionGenerateVector(IplImage *image)
 	}
 	return vector;
 }
+
