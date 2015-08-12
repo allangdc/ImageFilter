@@ -8,7 +8,9 @@
 #include "TrainingNN.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
+#include <math.h>
 
 TrainingNNData *TrainingNNDataCreate(int num_inputs, SamplingRegion *region)
 {
@@ -19,22 +21,22 @@ TrainingNNData *TrainingNNDataCreate(int num_inputs, SamplingRegion *region)
 	return tdata;
 }
 
-void TrainingNNDataSetInputValue(TrainingNNData *tdata, IplImage *in)
+void TrainingNNDataSetData(TrainingNNData *tdata, ImageIO *imageio)
 {
 	int l = tdata->region->square_size;
-	IplImage *small_image = SampleRegionGetImageRegion(in, tdata->region);
-	uchar *vector = SampleRegionGenerateVector(small_image);
-	tdata->inputs = vector;
-	cvReleaseImage(&small_image);
-}
-
-void TrainingNNDataSetOutput(TrainingNNData *tdata, IplImage *out)
-{
-	int l = tdata->region->square_size;
-	IplImage *small_image = SampleRegionGetImageRegion(out, tdata->region);
-	uchar *vector = SampleRegionGenerateVector(small_image);
+	IplImage *small_image_in = SampleRegionGetImageRegion(tdata->region, imageio->in);
+	IplImage *small_image_out = SampleRegionGetImageRegion(tdata->region, imageio->out);
+	if(tdata->inputs)
+	{
+		free(tdata->inputs);
+		tdata->inputs = NULL;
+	}
+	tdata->inputs = SampleRegionGenerateVector(small_image_in);
+	uchar *vector = SampleRegionGenerateVector(small_image_out);
 	tdata->outputs = *(vector + (l-1)/2);
-	cvReleaseImage(&small_image);
+	free(vector);
+	cvReleaseImage(&small_image_in);
+	cvReleaseImage(&small_image_out);
 }
 
 void TrainingNNDataDestroy(TrainingNNData **tdata)
@@ -47,6 +49,24 @@ void TrainingNNDataDestroy(TrainingNNData **tdata)
 	free((*tdata)->region);
 	free(tdata);
 	tdata = NULL;
+}
+
+void TrainingNNDataPrint(TrainingNNData *tdata)
+{
+	int i;
+	int square = sqrt(tdata->num_inputs);
+	printf("| ");
+	for(i=0; i<tdata->num_inputs; i++)
+	{
+		printf("%3d ", *(tdata->inputs));
+		if(i%square==0)
+		{
+			if(i+1 < tdata->num_inputs)
+				printf("|\n| ");
+			else
+				printf("|\n");
+		}
+	}
 }
 
 TrainingNN *TrainingNNCreate(int num_images, int sample_per_images)

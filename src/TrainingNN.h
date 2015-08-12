@@ -11,6 +11,7 @@
 #include <cv.h>
 
 #include "sampling.h"
+#include "ImageIO.h"
 
 typedef struct trainingnn_data
 {
@@ -21,9 +22,8 @@ typedef struct trainingnn_data
 } TrainingNNData;
 
 TrainingNNData *TrainingNNDataCreate(int num_inputs, SamplingRegion *region);
-void TrainingNNDataSetInputValue(TrainingNNData *tdata, IplImage *in);
-void TrainingNNDataSetOutput(TrainingNNData *tdata, IplImage *out);
 void TrainingNNDataDestroy(TrainingNNData **tdata);
+void TrainingNNDataSetData(TrainingNNData *tdata, ImageIO *imageio);
 
 typedef struct trainingnn
 {

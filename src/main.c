@@ -72,6 +72,9 @@ int main(int argc, char **argv)
 	cvResize(img_in, img_in_res, CV_INTER_LINEAR);
 
 	IplImage *in = cvCreateImage(cvGetSize(img_in_res), IPL_DEPTH_8U, 1);
+	IplImage *Y = cvCreateImage(cvGetSize(img_in_res), IPL_DEPTH_8U, 1);
+	IplImage *U = cvCreateImage(cvGetSize(img_in_res), IPL_DEPTH_8U, 1);
+	IplImage *V = cvCreateImage(cvGetSize(img_in_res), IPL_DEPTH_8U, 1);
 	cvCvtColor(img_in_res, in, CV_BGR2GRAY);
 	IplImage *out = NULL;
 
