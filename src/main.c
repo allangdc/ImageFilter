@@ -6,8 +6,7 @@
 #include "ImageIO.h"
 #include "sampling.h"
 
-#define FILE_IN  "/tmp/guest-BPnygU/Pictures/lena_noise.bmp"
-#define FILE_OUT FILE_IN  //"/home/allan/Imagens/Filter/o_002.png"
+#define FILE_IN  "/tmp/guest-NQNzeV/Pictures/img.png"
 
 void ShowImage(IplImage *image, const char *title) 
 {
@@ -29,11 +28,6 @@ void SVLM(IplImage *src, IplImage **dst)
 	cvSmooth(src, tr3, CV_GAUSSIAN, 7, 7, 0, 0);
 	cvSmooth(src, tr4, CV_GAUSSIAN, 9, 9, 0, 0);
 
-	ShowImage(tr1, "3x3");
-	ShowImage(tr2, "5x5");
-	ShowImage(tr3, "7x7");
-	ShowImage(tr4, "9x9");
-
 	if(*dst)
 	{
 		free(*dst);
@@ -49,16 +43,17 @@ void SVLM(IplImage *src, IplImage **dst)
 			uchar v2 = CV_IMAGE_ELEM(tr2, uchar, h, w);
 			uchar v3 = CV_IMAGE_ELEM(tr3, uchar, h, w);
 			uchar v4 = CV_IMAGE_ELEM(tr4, uchar, h, w);
-			float sum = v1 + v2 + v3 + v4;
-			sum /= 4.0;
-			//CV_IMAGE_ELEM(tr, uchar, h, w) = (uchar) sum;
-			//Image_ratio(i,j) = 0.5^((128-Image_gray_trans(i,j))/128);
-			double ratio = pow(0.5, ((128.0-sum)/128.0) );
+			uchar I = CV_IMAGE_ELEM(src, uchar, h, w);
+			float svlm = v1 + v2 + v3 + v4;
+			svlm /= 4.0;
 
-			//O(i,j) = 255 * (Image_gray(i,j)/255)^Image_ratio(i,j);
-			double o = pow(255.0 * (sum/255.0), ratio);
+			double alpha = 0.5;
+			double gama = pow(alpha, ((128.0-svlm)/128.0) );
 
-			CV_IMAGE_ELEM(*dst, uchar, h, w) = (uchar) o;
+			double o = pow(255.0 * (I/255.0), gama);
+
+			uchar out = (uchar) o;
+			CV_IMAGE_ELEM(*dst, uchar, h, w) = out;
 		}
 	}
 }
@@ -67,19 +62,20 @@ int main(int argc, char **argv)
 {
 	char *title_in = "Entrada";
 
-	IplImage *img_in = cvLoadImage(FILE_IN, CV_LOAD_IMAGE_COLOR);
-	IplImage *img_in_res = cvCreateImage(cvSize(img_in->width/2, img_in->height/2), IPL_DEPTH_8U, 3);
-	cvResize(img_in, img_in_res, CV_INTER_LINEAR);
+	IplImage *img_in_a = cvLoadImage(FILE_IN, CV_LOAD_IMAGE_COLOR);
+	IplImage *img_in = cvCreateImage(cvSize(img_in_a->width/2, img_in_a->height/2), IPL_DEPTH_8U, 3);
+	cvResize(img_in_a, img_in, CV_INTER_LINEAR);
 
-	IplImage *in = cvCreateImage(cvGetSize(img_in_res), IPL_DEPTH_8U, 1);
-	IplImage *Y = cvCreateImage(cvGetSize(img_in_res), IPL_DEPTH_8U, 1);
-	IplImage *U = cvCreateImage(cvGetSize(img_in_res), IPL_DEPTH_8U, 1);
-	IplImage *V = cvCreateImage(cvGetSize(img_in_res), IPL_DEPTH_8U, 1);
-	cvCvtColor(img_in_res, in, CV_BGR2GRAY);
+	IplImage *in = cvCreateImage(cvGetSize(img_in), IPL_DEPTH_8U, 3);
+	IplImage *H = cvCreateImage(cvGetSize(img_in), IPL_DEPTH_8U, 1);
+	IplImage *S = cvCreateImage(cvGetSize(img_in), IPL_DEPTH_8U, 1);
+	IplImage *V = cvCreateImage(cvGetSize(img_in), IPL_DEPTH_8U, 1);
+	cvCvtColor(img_in, in, CV_BGR2HSV);
+	cvSplit(in, H,S,V, NULL);
 	IplImage *out = NULL;
 
-	SVLM(in, &out);
-	ShowImage(in, "input");
+	SVLM(V, &out);
+	ShowImage(V, "input");
 	ShowImage(out, "output");
 	cvWaitKey(0);
 	
