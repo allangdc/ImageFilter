@@ -1,8 +1,8 @@
 %SVLM
-clear all;
-close all;
-tic;
-original_image = imread('/home/allan/Imagens/floresta.jpg');
+
+pkg load image
+
+original_image = imread("/home/allan/Imagens/Filter/floresta.jpg");
 image_size = size(original_image);
 height = image_size(1,1);
 width = image_size(1,2);
@@ -15,21 +15,22 @@ else
     disp('Not a color image');
     return;
 end
-% figure('Name','Original Image','Numbertitle','off');
-% imshow(original_image);
+figure('Name','Original Image','Numbertitle','off');
+imshow(original_image);
 
 % figure('Name','Luminance','Numbertitle','off');
 % imshow(mat2gray(I));
 
 gaussian_lpf = fspecial('gaussian',[3, 3]);
-L1 = imfilter(I,gaussian_lpf);
-L2 = imresize(imfilter(imresize(I,[height/2, width/2]),gaussian_lpf),[height, width],'bicubic');
-L3 = imresize(imfilter(imresize(I,[height/4, width/4]),gaussian_lpf),[height, width],'bicubic');
-L4 = imresize(imfilter(imresize(I,[height/8, width/8]),gaussian_lpf),[height, width],'bicubic');
+I1 = mat2gray(I);
+L1 = imfilter(I1,gaussian_lpf);
+L2 = imresize(mat2gray(imfilter(imresize(I1,[height/2, width/2]),gaussian_lpf)),[height, width],'bicubic');
+L3 = imresize(mat2gray(imfilter(imresize(I1,[height/4, width/4]),gaussian_lpf)),[height, width],'bicubic');
+L4 = imresize(mat2gray(imfilter(imresize(I1,[height/8, width/8]),gaussian_lpf)),[height, width],'bicubic');
 
 SVLM = (L1 + L2 + L3 + L4)/4;
-% figure('Name','SVLM','Numbertitle','off');
-% imshow(mat2gray(SVLM));
+figure('Name','SVLM','Numbertitle','off');
+imshow(mat2gray(SVLM));
 
 
 alfa = 0.5;
@@ -61,9 +62,11 @@ Gm = S.*(G./O)*lambda_green;
 Bm = S.*(B./O)*lambda_blue;
 
 enhanced_image = cat(3,Rm,Gm,Bm);
-toc;
+
 figure('Name','Enhanced Image','Numbertitle','off');
 imshow(enhanced_image/255);
+
+waitforbuttonpress;
 
 % tic;
 % corrected_image = enhanced_image;
@@ -78,6 +81,5 @@ imshow(enhanced_image/255);
 %         corrected_image(y,x,3) = b_o*255;
 %     end
 % end
-% toc;
 % figure('Name','Test');
 % imshow(corrected_image);
