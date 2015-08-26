@@ -6,7 +6,7 @@
 #include "ImageIO.h"
 #include "sampling.h"
 
-#define FILE_IN  "/home/allan/Imagens/Filter/test2.png"
+#define FILE_IN  "../src/images/img001.jpg"
 
 void ShowImage(IplImage *image, const char *title) 
 {
@@ -17,26 +17,44 @@ void ShowImage(IplImage *image, const char *title)
 
 void svlm(IplImage *src, IplImage *dst)
 {
-	IplImage *hsv, *h, *s, *v;
-	hsv = cvCreateImage(cvGetSize(src), IPL_DEPTH_8U, 3);
+	IplImage *hsv, *hsv_32, *h, *s, *v;
+	CvSize size = cvGetSize(src);
+	hsv = cvCreateImage(size, IPL_DEPTH_8U, 3);
+	hsv_32 = cvCreateImage(size, IPL_DEPTH_32F, 3);
+	h = cvCreateImage(size, IPL_DEPTH_32F, 1);
+	s = cvCreateImage(size, IPL_DEPTH_32F, 1);
+	v = cvCreateImage(size, IPL_DEPTH_32F, 1);
 	cvCvtColor(src, hsv, CV_BGR2HSV);
-	cvSplit(hsv, h, s, v, NULL);
+	cvConvertScale(hsv, hsv_32, 1, 0);
+	cvSplit(hsv_32, h, s, v, NULL);
 
 	IplImage **L = (IplImage **) malloc(sizeof(IplImage *) * 4);
-	IplImage *aux;
 	int dv;
-	CvSize size = cvGetSize(v);
 	int i;
 	for(i=0; i<4; i++)
 	{
 		dv = pow(2, i);
-		*(L+i) = cvCreateImage(cvGetSize(v), IPL_DEPTH_8U, 1);
-		aux = cvCreateImage(cvSize(size.width/dv, size.height/dv), IPL_DEPTH_8U, 1);
+		CvSize size_reduce = cvSize(size.width/dv, size.height/dv);
+
+		*(L+i) = cvCreateImage(size, IPL_DEPTH_32F, 1);
+		IplImage *aux = cvCreateImage(size_reduce, IPL_DEPTH_32F, 1);
+
 		cvResize(v, aux, CV_INTER_CUBIC);
 		cvSmooth(aux, aux, CV_GAUSSIAN, 3, 3, 0, 0);
 		cvResize(aux, *(L+i), CV_INTER_CUBIC);
 		cvReleaseImage(&aux);
 	}
+
+	IplImage *s1, *s2, *s3, *f;
+	s1 = cvCreateImage(size, IPL_DEPTH_32F, 1);
+	s2 = cvCreateImage(size, IPL_DEPTH_32F, 1);
+	s3 = cvCreateImage(size, IPL_DEPTH_32F, 1);
+	f = cvCreateImage(size, IPL_DEPTH_8U, 1);
+	cvAddWeighted(*(L+0), 0.25, *(L+1), 0.25, 0, s1);
+	cvAddWeighted(*(L+2), 0.25, *(L+3), 0.25, 0, s2);
+	cvAddWeighted(s1, 0.25, s2, 0.25, 0, s3);
+	cvConvertScale(s3, f, 1, 0);
+	ShowImage(f, "S3");
 }
 
 void aSVLM(IplImage *src, IplImage *dst)
@@ -110,10 +128,9 @@ int main(int argc, char **argv)
 
 	IplImage *out = cvCreateImage(cvGetSize(img_in_a), IPL_DEPTH_8U, 3);
 	int x;
-	for(x=0; x<1000000; x++)
-		aSVLM(img_in_a, out);
-	ShowImage(img_in_a, "input");
-	ShowImage(out, "output");
+	//for(x=0; x<1000000; x++);
+		svlm(img_in_a, out);
+	//ShowImage(out, "output");
 	cvWaitKey(0);
 	
 
