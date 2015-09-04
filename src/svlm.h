@@ -10,6 +10,17 @@
 
 #include <cv.h>
 
-void SVLM(IplImage *src, IplImage **dst);
+typedef struct svlmimage
+{
+	IplImage *h32, *s32, *v32;
+	CvSize size;
+} SVLMImage;
+
+SVLMImage *SvlmCreate(IplImage *bgr_image);
+void SvlmDestroy(SVLMImage **svlm);
+void SvlmEdit(SVLMImage *svlm, IplImage *bgr_image);
+
+IplImage *SvlmComponent(IplImage *value_component_32f);
+void SvlmFilter(IplImage *src, IplImage *dst);
 
 #endif /* SVLM_H_ */

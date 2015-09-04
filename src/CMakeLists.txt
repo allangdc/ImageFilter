@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project( ImageFilter C )
 
 find_package( OpenCV REQUIRED)
-#FIND_PACKAGE( OpenMP REQUIRED)
+FIND_PACKAGE( OpenMP REQUIRED)
 
 if(OPENMP_FOUND)
 	message("OPENMP FOUND")
