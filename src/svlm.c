@@ -9,6 +9,8 @@
 #include "svlm.h"
 
 #include <highgui.h>
+#include <math.h>
+#include <stdio.h>
 
 IplImage *SvlmComponent(IplImage *value_component_32f)
 {
@@ -48,7 +50,7 @@ IplImage *SvlmComponent(IplImage *value_component_32f)
 	free(L);
 
 	IplImage *svlm = cvCreateImage(size, IPL_DEPTH_32F, 1);
-	cvAddWeighted(*(svlm_vector + 0), 0.25, *(svlm_vector + 1), 0.25, 0, svlm);
+	cvAddWeighted(*(svlm_vector + 0), 1, *(svlm_vector + 1), 1, 0, svlm);
 	cvReleaseImage(&(*(svlm_vector+0)));
 	cvReleaseImage(&(*(svlm_vector+1)));
 	free(svlm_vector);
@@ -67,6 +69,8 @@ SVLMImage *SvlmCreate(IplImage *bgr_image)
 	svlm->h32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
 	svlm->s32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
 	svlm->v32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
+
+	svlm->vout = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
 
 	cvCvtColor(bgr_image, hsv, CV_BGR2HSV);
 	cvConvertScale(hsv, hsv32, 1, 0);
@@ -104,6 +108,8 @@ void SvlmDestroy(SVLMImage **svlm)
 	cvReleaseImage(&(s->h32));
 	cvReleaseImage(&(s->s32));
 	cvReleaseImage(&(s->v32));
+
+	cvReleaseImage(&(s->vout));
 	free(*svlm);
 	*svlm = NULL;
 }
@@ -113,10 +119,37 @@ void SvlmFilter(IplImage *src, IplImage *dst)
 	SVLMImage *svlm_image = SvlmCreate(src);
 
 	IplImage *svlm = SvlmComponent(svlm_image->v32);
+	SvlmLuminanceEnhancement(svlm_image, svlm);
 
-	cvConvertScale(svlm, dst, 1, 0);
+	//cvConvertScale(svlm, dst, 1, 0);
+	cvConvertScale(svlm_image->vout, dst, 1, 0);
 
 	cvReleaseImage(&svlm);
 	SvlmDestroy(&svlm_image);
 }
+
+void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm)
+{
+	int w, h;
+	float a = 0.5;
+	IplImage *ss = cvCreateImage(svlm_image->size, IPL_DEPTH_8U, 1);
+	cvConvertScale(svlm, ss, 1, 0);
+	for(h=0; h<svlm_image->size.height; h++)
+	{
+		for(w=0; w<svlm_image->size.width; w++)
+		{
+			uchar s = CV_IMAGE_ELEM(ss, uchar, h, w);
+			double lambda = pow(a, (128.0-s)/128.0);
+			uchar i = CV_IMAGE_ELEM(svlm_image->v32, float, h, w);
+			double o = pow(i, lambda);
+			CV_IMAGE_ELEM(svlm_image->vout, float, h, w) = o;
+		}
+	}
+}
+
+
+
+
+
+
 

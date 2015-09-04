@@ -21,17 +21,23 @@ void VideoImage(void)
 
 	char ch=0;
 	IplImage *svlm = NULL;
+	IplImage *v = NULL;
+	IplImage *hsv = NULL;
 	while(ch!='q')
 	{
 		IplImage *frame = cvQueryFrame(capture);
 		if(!svlm)
 		{
 			svlm = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
+			hsv = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 3);
+			v = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
 		}
 		SvlmFilter(frame, svlm);
 
+		cvCvtColor(frame, hsv, CV_BGR2HSV);
+		cvSplit(hsv, NULL, NULL, v, NULL);
 		ShowImage(svlm, "svlm");
-		ShowImage(frame, "frame");
+		ShowImage(v, "frame");
 		ch = (char) cvWaitKey(50);
 	}
 
@@ -51,9 +57,9 @@ int main(int argc, char **argv)
 	int x;
 
 
-	/*
+
 	double diff = 0;
-	for(x=0; x<1000; x++)
+	for(x=0; x<1; x++)
 	{
 		clock_t start = clock();
 		SvlmFilter(img_in_a, out);
@@ -63,9 +69,9 @@ int main(int argc, char **argv)
 	printf("\nTIME = %lf\n", diff);
 	ShowImage(out, "output");
 	cvWaitKey(0);
-	*/
 
-	VideoImage();
+
+	//VideoImage();
 	
 	//TIME = 189.554687
 	//TIME = 0.194058

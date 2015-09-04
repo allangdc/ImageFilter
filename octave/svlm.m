@@ -2,7 +2,7 @@
 
 pkg load image
 
-original_image = imread("/home/allan/Imagens/Filter/floresta.jpg");
+original_image = imread("../src/images/img001.jpg");
 image_size = size(original_image);
 height = image_size(1,1);
 width = image_size(1,2);
@@ -18,8 +18,8 @@ end
 figure('Name','Original Image','Numbertitle','off');
 imshow(original_image);
 
-% figure('Name','Luminance','Numbertitle','off');
-% imshow(mat2gray(I));
+figure('Name','Luminance','Numbertitle','off');
+imshow(mat2gray(I));
 
 gaussian_lpf = fspecial('gaussian',[3, 3]);
 I1 = mat2gray(I);
@@ -29,15 +29,15 @@ L3 = imresize(mat2gray(imfilter(imresize(I1,[height/4, width/4]),gaussian_lpf)),
 L4 = imresize(mat2gray(imfilter(imresize(I1,[height/8, width/8]),gaussian_lpf)),[height, width],'bicubic');
 
 SVLM = (L1 + L2 + L3 + L4)/4;
-figure('Name','SVLM','Numbertitle','off');
-imshow(mat2gray(SVLM));
+% figure('Name','SVLM','Numbertitle','off');
+% imshow(mat2gray(SVLM));
 
 
 alfa = 0.5;
 gamma = double(alfa.^((128 - double(SVLM))/128));
 O = 255*((double(I)/255).^gamma);
-% figure('Name','Enhanced Luminance','Numbertitle','off');
-% imshow(mat2gray(O));
+figure('Name','Enhanced Luminance','Numbertitle','off');
+imshow(mat2gray(O));
 
 sigma = std2(I);
 if sigma <= 40
