@@ -139,9 +139,9 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm)
 		for(w=0; w<svlm_image->size.width; w++)
 		{
 			uchar s = CV_IMAGE_ELEM(ss, uchar, h, w);
-			double lambda = pow(a, (128.0-s)/128.0);
-			uchar i = CV_IMAGE_ELEM(svlm_image->v32, float, h, w);
-			double o = pow(i, lambda);
+			double lambda = pow(a, (128.0-(double) s)/128.0);
+			float i = CV_IMAGE_ELEM(svlm_image->v32, float, h, w);
+			double o = 255.0*pow(i/255.0, lambda);
 			CV_IMAGE_ELEM(svlm_image->vout, float, h, w) = o;
 		}
 	}
