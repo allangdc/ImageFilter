@@ -145,6 +145,17 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm)
 			CV_IMAGE_ELEM(svlm_image->vout, float, h, w) = o;
 		}
 	}
+
+	CvScalar std_scalar, mean_scalar;
+	cvAvgSdv(svlm_image->v32, &mean_scalar, &std_scalar, NULL);
+	int sigma = std_scalar.val[0];
+	float p;
+	if(sigma <= 40)
+		p = 2;
+	else if(sigma <= 80)
+		p = -0.025*sigma + 3;
+	else
+		p = 1;
 }
 
 
