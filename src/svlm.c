@@ -145,6 +145,7 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm)
 			CV_IMAGE_ELEM(svlm_image->vout, float, h, w) = o;
 		}
 	}
+	cvReleaseImage(&ss);
 
 	CvScalar std_scalar, mean_scalar;
 	cvAvgSdv(svlm_image->v32, &mean_scalar, &std_scalar, NULL);
@@ -156,6 +157,18 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm)
 		p = -0.025*sigma + 3;
 	else
 		p = 1;
+	IplImage *e = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
+	for(h=0; h<svlm_image->size.height; h++)
+	{
+		for(w=0; w<svlm_image->size.width; w++)
+		{
+			uchar s = CV_IMAGE_ELEM(ss, uchar, h, w);
+			double lambda = pow(a, (128.0-(double) s)/128.0);
+			float i = CV_IMAGE_ELEM(svlm_image->v32, float, h, w);
+			double o = 255.0*pow(i/255.0, lambda);
+			CV_IMAGE_ELEM(svlm_image->vout, float, h, w) = o;
+		}
+	}
 }
 
 
