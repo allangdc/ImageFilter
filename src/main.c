@@ -41,7 +41,7 @@ void VideoImage(void)
 		ch = (char) cvWaitKey(50);
 	}
 
-	cvReleaseImage(svlm);
+	cvReleaseImage(&svlm);
 	cvReleaseCapture(&capture);
 }
 
@@ -55,8 +55,6 @@ int main(int argc, char **argv)
 
 	IplImage *out = cvCreateImage(cvGetSize(img_in_a), IPL_DEPTH_8U, 1);
 	int x;
-
-
 
 	double diff = 0;
 	for(x=0; x<1; x++)

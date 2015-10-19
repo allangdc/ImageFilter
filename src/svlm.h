@@ -12,6 +12,7 @@
 
 typedef struct svlmimage
 {
+	IplImage *b32, *g32, *r32;
 	IplImage *h32, *s32, *v32;
 	CvSize size;
 	IplImage *vout;
@@ -20,8 +21,8 @@ typedef struct svlmimage
 SVLMImage *SvlmCreate(IplImage *bgr_image);
 void SvlmDestroy(SVLMImage **svlm);
 void SvlmEdit(SVLMImage *svlm, IplImage *bgr_image);
-
 IplImage *SvlmComponent(IplImage *value_component_32f);
 void SvlmFilter(IplImage *src, IplImage *dst);
+void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm);
 
 #endif /* SVLM_H_ */

@@ -60,6 +60,7 @@ IplImage *SvlmComponent(IplImage *value_component_32f)
 SVLMImage *SvlmCreate(IplImage *bgr_image)
 {
 	IplImage *hsv, *hsv32;
+	IplImage *bgr32;
 
 	SVLMImage *svlm = (SVLMImage *) malloc(sizeof(SVLMImage));
 	svlm->size = cvGetSize(bgr_image);
@@ -70,16 +71,29 @@ SVLMImage *SvlmCreate(IplImage *bgr_image)
 	svlm->s32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
 	svlm->v32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
 
+	bgr32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 3);
+	svlm->b32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
+	svlm->g32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
+	svlm->r32 = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
+
 	svlm->vout = cvCreateImage(svlm->size, IPL_DEPTH_32F, 1);
 
 	cvCvtColor(bgr_image, hsv, CV_BGR2HSV);
 	cvConvertScale(hsv, hsv32, 1, 0);
 	cvSplit(hsv32, svlm->h32, svlm->s32, svlm->v32, NULL);
+
+	cvConvertScale(bgr_image, bgr32, 1, 0);
+	cvSplit(bgr32, svlm->b32, svlm->g32, svlm->r32, NULL);
+
+	cvReleaseImage(&bgr32);
 	cvReleaseImage(&hsv32);
 	cvReleaseImage(&hsv);
 	return svlm;
 }
 
+/**
+ * @TODO Adds the edit implementation for bgr32 images.
+ */
 void SvlmEdit(SVLMImage *svlm, IplImage *bgr_image)
 {
 	IplImage *hsv, *hsv32;
@@ -109,6 +123,10 @@ void SvlmDestroy(SVLMImage **svlm)
 	cvReleaseImage(&(s->s32));
 	cvReleaseImage(&(s->v32));
 
+	cvReleaseImage(&(s->b32));
+	cvReleaseImage(&(s->g32));
+	cvReleaseImage(&(s->r32));
+
 	cvReleaseImage(&(s->vout));
 	free(*svlm);
 	*svlm = NULL;
@@ -119,8 +137,8 @@ void SvlmFilter(IplImage *src, IplImage *dst)
 	SVLMImage *svlm_image = SvlmCreate(src);
 
 	IplImage *svlm = SvlmComponent(svlm_image->v32);
-	SvlmLuminanceEnhancement(svlm_image, svlm);
 
+	SvlmLuminanceEnhancement(svlm_image, svlm);
 	//cvConvertScale(svlm, dst, 1, 0);
 	cvConvertScale(svlm_image->vout, dst, 1, 0);
 
@@ -145,7 +163,6 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm)
 			CV_IMAGE_ELEM(svlm_image->vout, float, h, w) = o;
 		}
 	}
-	cvReleaseImage(&ss);
 
 	CvScalar std_scalar, mean_scalar;
 	cvAvgSdv(svlm_image->v32, &mean_scalar, &std_scalar, NULL);
@@ -157,18 +174,14 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm)
 		p = -0.025*sigma + 3;
 	else
 		p = 1;
-	IplImage *e = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
-	for(h=0; h<svlm_image->size.height; h++)
-	{
-		for(w=0; w<svlm_image->size.width; w++)
-		{
-			uchar s = CV_IMAGE_ELEM(ss, uchar, h, w);
-			double lambda = pow(a, (128.0-(double) s)/128.0);
-			float i = CV_IMAGE_ELEM(svlm_image->v32, float, h, w);
-			double o = 255.0*pow(i/255.0, lambda);
-			CV_IMAGE_ELEM(svlm_image->vout, float, h, w) = o;
-		}
-	}
+
+	IplImage *r1 = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
+	cvDiv(svlm_image->r32, svlm_image->vout, r1, 1);
+	cvMul(r1, ss, r1, 1);
+
+	//TODO: Finish this point [ R' = S * R/O * lambda' ]
+
+	cvReleaseImage(&ss);
 }
 
 
