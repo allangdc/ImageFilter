@@ -138,17 +138,17 @@ void SvlmFilter(IplImage *src, IplImage *dst)
 
 	IplImage *svlm = SvlmComponent(svlm_image->v32);
 
-	SvlmLuminanceEnhancement(svlm_image, svlm);
+    SvlmLuminanceEnhancement(svlm_image, svlm);
 	//cvConvertScale(svlm, dst, 1, 0);
-	//cvConvertScale(svlm_image->vout, dst, 1, 0);
+    cvConvertScale(svlm_image->vout, dst, 1, 0);
 
-	printf("\n%d,%d\n", cvGetSize(dst).width, cvGetSize(dst).height);
-	IplImage *img = cvCreateImage(cvGetSize(src), IPL_DEPTH_32F, 3);
-	cvMerge(svlm_image->b32, svlm_image->g32, svlm_image->r32, NULL, img);
-	cvConvertScale(img, dst, 1, 0);
+    printf("\n%d,%d\n", cvGetSize(dst).width, cvGetSize(dst).height);
+    //IplImage *img = cvCreateImage(cvGetSize(src), IPL_DEPTH_32F, 3);
+    //cvMerge(svlm_image->b32, svlm_image->g32, svlm_image->r32, NULL, img);
+    //cvConvertScale(img, dst, 1, 0);
 
 
-	cvReleaseImage(&img);
+    //cvReleaseImage(&img);
 	cvReleaseImage(&svlm);
 	SvlmDestroy(&svlm_image);
 }
@@ -168,7 +168,7 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *isvlm)
 
 
 	int w, h;
-	float a = 0.5;
+    float alpha = 0.5;
 
 	/*
 	IplImage *ss = cvCreateImage(svlm_image->size, IPL_DEPTH_8U, 1);
@@ -187,10 +187,22 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *isvlm)
 		}
 	}
 	*/
-	IplImage *lambda = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
-	cvMul(isvlm, NULL, lambda, log(a)); 	//@TODO: adjust to (128-svlm)/128   (I*ln a)
-	cvExp(lambda, lambda);					// = e^(I*ln a)
 
+    IplImage *lambda = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
+    cvMul(isvlm, NULL, lambda, log(alpha)); 	//@TODO: adjust to (128-svlm)/128   (I*ln a)
+    cvExp(lambda, lambda);                      // = e^(I*ln a) = a^I
+
+    IplImage *O = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
+    cvMul(svlm_image->v32, NULL, O, 1.0/255.0);     //(I/255)
+    cvLog(O, O);                                    //log(I/255)
+    cvMul(O, lambda, O, 1);                         //lambda * log(I/255)
+    cvExp(O, O);                                    //e^(lambda * log(I/255)) = (I/255)^lambda
+    cvMul(O, NULL, svlm_image->vout, 255.0);                       //255*((I/255)^lambda)
+
+
+    cvReleaseImage(&O);
+    cvReleaseImage(&lambda);
+/*
 	//TODO: Finish this point [ R' = S * R/O * lambda' ]
 	double lambda_scale = 0.9;
 	IplImage *r1 = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
@@ -210,6 +222,7 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *isvlm)
 	cvCopy(r1, svlm_image->r32, NULL);
 
 	cvReleaseImage(&ss);
+*/
 }
 
 

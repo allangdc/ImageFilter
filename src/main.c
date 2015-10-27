@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
 	IplImage *img_in_a = cvLoadImage(FILE_IN, CV_LOAD_IMAGE_COLOR);
 
-	IplImage *out = cvCreateImage(cvGetSize(img_in_a), IPL_DEPTH_8U, 3);
+    IplImage *out = cvCreateImage(cvGetSize(img_in_a), IPL_DEPTH_8U, 1);
 	int x;
 
 	double diff = 0;
