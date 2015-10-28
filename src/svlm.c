@@ -139,62 +139,30 @@ void SvlmFilter(IplImage *src, IplImage *dst)
 	IplImage *svlm = SvlmComponent(svlm_image->v32);
 
     SvlmLuminanceEnhancement(svlm_image, svlm);
-	//cvConvertScale(svlm, dst, 1, 0);
-    cvConvertScale(svlm_image->vout, dst, 1, 0);
+    SvlmContrastEnhancement(svlm_image, svlm);
 
-    printf("\n%d,%d\n", cvGetSize(dst).width, cvGetSize(dst).height);
-    //IplImage *img = cvCreateImage(cvGetSize(src), IPL_DEPTH_32F, 3);
-    //cvMerge(svlm_image->b32, svlm_image->g32, svlm_image->r32, NULL, img);
-    //cvConvertScale(img, dst, 1, 0);
+    IplImage *aux = cvCreateImage(cvGetSize(src), IPL_DEPTH_32F, 3);
+    cvMerge(svlm_image->b32, svlm_image->g32, svlm_image->r32, NULL, aux);
+    cvConvertScale(aux, dst, 1, 0);
 
-
-    //cvReleaseImage(&img);
+    cvReleaseImage(&aux);
 	cvReleaseImage(&svlm);
 	SvlmDestroy(&svlm_image);
 }
 
 void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *isvlm)
 {
-	CvScalar std_scalar, mean_scalar;
-	cvAvgSdv(svlm_image->v32, &mean_scalar, &std_scalar, NULL);
-	int sigma = std_scalar.val[0];
-	float p;
-	if(sigma <= 40)
-		p = 2;
-	else if(sigma <= 80)
-		p = -0.025*sigma + 3;
-	else
-		p = 1;
-
-
-	int w, h;
     float alpha = 0.5;
-
-	/*
-	IplImage *ss = cvCreateImage(svlm_image->size, IPL_DEPTH_8U, 1);
-	cvConvertScale(isvlm, ss, 1, 0);
-	for(h=0; h<svlm_image->size.height; h++)
-	{
-		for(w=0; w<svlm_image->size.width; w++)
-		{
-			uchar svlm = CV_IMAGE_ELEM(ss, uchar, h, w);
-			double lambda = pow(a, (128.0-(double) svlm)/128.0);
-			float i = CV_IMAGE_ELEM(svlm_image->v32, float, h, w);
-			double o = 255.0*pow(i/255.0, lambda);
-			CV_IMAGE_ELEM(svlm_image->vout, float, h, w) = o;
-			double e = pow((double)svlm / o, p);
-			double s = pow(o / 255.0, e);
-		}
-	}
-	*/
 
     IplImage *mul = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
     cvSet(mul, cvScalar(1,1,1,1), NULL);
 
     IplImage *lambda = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
-    cvMul(isvlm, mul, isvlm, 1.0/128.0);
-    cvSub(mul, isvlm, isvlm, NULL);
-    cvMul(isvlm, mul, lambda, log(alpha));      //@TODO: adjust to (128-svlm)/128   (I*ln a)
+    IplImage *scale_svlm = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
+    cvMul(isvlm, mul, scale_svlm, 1.0/128.0);
+    cvSub(mul, scale_svlm, scale_svlm, NULL);   //scale_svlm = 1 - svlm/128;
+    cvMul(scale_svlm, mul, lambda, log(alpha)); // = (I*ln a)
+    cvReleaseImage(&scale_svlm);
     cvExp(lambda, lambda);                      // = e^(I*ln a) = a^I
 
     IplImage *O = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
@@ -202,37 +170,56 @@ void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *isvlm)
     cvLog(O, O);                                    //log(I/255)
     cvMul(O, lambda, O, 1);                         //lambda * log(I/255)
     cvExp(O, O);                                    //e^(lambda * log(I/255)) = (I/255)^lambda
-    cvMul(O, mul, svlm_image->vout, 255.0);        //255*((I/255)^lambda)
+    cvMul(O, mul, svlm_image->vout, 255.0);         //255*((I/255)^lambda)
 
-    cvReleaseImage(&mul);
     cvReleaseImage(&O);
+    cvReleaseImage(&mul);
     cvReleaseImage(&lambda);
-/*
-	//TODO: Finish this point [ R' = S * R/O * lambda' ]
-	double lambda_scale = 0.9;
-	IplImage *r1 = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
-	cvDiv(svlm_image->r32, svlm_image->vout, r1, 1);
-	cvMul(r1, ss, r1, lambda_scale);
-
-	IplImage *g1 = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
-	cvDiv(svlm_image->g32, svlm_image->vout, g1, 1);
-	cvMul(g1, ss, g1, lambda_scale);
-
-	IplImage *b1 = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
-	cvDiv(svlm_image->b32, svlm_image->vout, b1, 1);
-	cvMul(b1, ss, b1, lambda_scale);
-
-	cvCopy(b1, svlm_image->b32, NULL);
-	cvCopy(g1, svlm_image->g32, NULL);
-	cvCopy(r1, svlm_image->r32, NULL);
-
-	cvReleaseImage(&ss);
-*/
 }
 
+void SvlmContrastEnhancement(SVLMImage *svlm_image, IplImage *isvlm)
+{
+    CvScalar std_scalar, mean_scalar;
+    cvAvgSdv(svlm_image->v32, &mean_scalar, &std_scalar, NULL);
+    int sigma = std_scalar.val[0];
+    float p;
+    if(sigma <= 40)
+        p = 2;
+    else if(sigma <= 80)
+        p = -0.025*sigma + 3;
+    else
+        p = 1;
 
+    IplImage *mul = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
+    cvSet(mul, cvScalar(1,1,1,1), NULL);
 
+    IplImage *E = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
+    cvDiv(isvlm, svlm_image->vout, E, 1);
+    cvPow(E,E, p);
 
+    IplImage *S = cvCreateImage(svlm_image->size, IPL_DEPTH_32F, 1);
+    cvMul(svlm_image->vout, mul, S, 1.0/255.0);     //(O/255)
+    cvLog(S, S);                                    //log(O/255)
+    cvMul(S, E, S, 1);                              //E * log(O/255)
+    cvExp(S, S);                                    //e^(E * log(O/255)) = (O/255)^E
+    cvMul(S, mul, S, 255.0);                        //255*((O/255)^E)
 
+    SvlmColorRestoration(svlm_image, S);
 
+    cvReleaseImage(&mul);
+    cvReleaseImage(&S);
+    cvReleaseImage(&E);
+}
 
+void SvlmColorRestoration(SVLMImage *svlm_image, IplImage *S)
+{
+    float lambda = 1;
+    cvDiv(svlm_image->r32, svlm_image->vout, svlm_image->r32, 1);
+    cvMul(svlm_image->r32, S, svlm_image->r32, lambda);
+
+    cvDiv(svlm_image->g32, svlm_image->vout, svlm_image->g32, 1);
+    cvMul(svlm_image->g32, S, svlm_image->g32, lambda);
+
+    cvDiv(svlm_image->b32, svlm_image->vout, svlm_image->b32, 1);
+    cvMul(svlm_image->b32, S, svlm_image->b32, lambda);
+}

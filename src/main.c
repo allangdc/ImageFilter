@@ -53,11 +53,11 @@ int main(int argc, char **argv)
 
 	IplImage *img_in_a = cvLoadImage(FILE_IN, CV_LOAD_IMAGE_COLOR);
 
-    IplImage *out = cvCreateImage(cvGetSize(img_in_a), IPL_DEPTH_8U, 1);
+    IplImage *out = cvCreateImage(cvGetSize(img_in_a), IPL_DEPTH_8U, 3);
 	int x;
 
 	double diff = 0;
-	for(x=0; x<1; x++)
+    for(x=0; x<1000; x++)
 	{
 		clock_t start = clock();
 		SvlmFilter(img_in_a, out);

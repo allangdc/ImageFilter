@@ -24,5 +24,7 @@ void SvlmEdit(SVLMImage *svlm, IplImage *bgr_image);
 IplImage *SvlmComponent(IplImage *value_component_32f);
 void SvlmFilter(IplImage *src, IplImage *dst);
 void SvlmLuminanceEnhancement(SVLMImage *svlm_image, IplImage *svlm);
+void SvlmContrastEnhancement(SVLMImage *svlm_image, IplImage *svlm);
+void SvlmColorRestoration(SVLMImage *svlm_image, IplImage *S);
 
 #endif /* SVLM_H_ */
