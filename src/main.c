@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 	int x;
 
 	double diff = 0;
-    for(x=0; x<1000; x++)
+    for(x=0; x<1; x++)
 	{
 		clock_t start = clock();
 		SvlmFilter(img_in_a, out);
