@@ -5,6 +5,7 @@
 #include <time.h>
 
 #include "svlm.h"
+#include "ToneMap.h"
 
 #define FILE_IN  "../src/images/img001.jpg"
 
@@ -60,7 +61,8 @@ int main(int argc, char **argv)
     for(x=0; x<1; x++)
 	{
 		clock_t start = clock();
-		SvlmFilter(img_in_a, out);
+        //SvlmFilter(img_in_a, out);
+        ToneMapFilter(img_in_a, out);
 		clock_t stop = clock();
 		diff += (stop - start) / (double) (CLOCKS_PER_SEC);
 	}

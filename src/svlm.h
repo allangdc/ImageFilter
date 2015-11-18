@@ -12,12 +12,12 @@
 
 typedef struct svlmimage
 {
-	IplImage *b32, *g32, *r32;
-	IplImage *h32, *s32, *v32;
-	CvSize size;
-	IplImage *vout;
-    IplImage *svlm;
-    IplImage *S;
+    IplImage    *b32, *g32, *r32;
+    IplImage    *h32, *s32, *v32;
+    CvSize      size;
+    IplImage    *vout;
+    IplImage    *svlm;
+    IplImage    *S;
 } SVLMImage;
 
 SVLMImage *SvlmCreate(IplImage *bgr_image);
