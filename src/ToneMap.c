@@ -29,6 +29,7 @@ ToneMapImage *ToneMapCreate(IplImage *bgr_image)
 
     tmap->l1 = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
     tmap->invl = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
+    tmap->out = cvCreateImage(tmap->size, IPL_DEPTH_32F, 3);
 
     cvReleaseImage(&bgr32);
     return tmap;
@@ -39,15 +40,15 @@ void ToneMapDestroy(ToneMapImage **tmap)
     ToneMapImage *t;
     t = *tmap;
 
-    cvReleaseImage(t->b);
-    cvReleaseImage(t->g);
-    cvReleaseImage(t->r);
-    cvReleaseImage(t->b1);
-    cvReleaseImage(t->g1);
-    cvReleaseImage(t->r1);
-    cvReleaseImage(t->l1);
-    cvReleaseImage(t->invl);
-    cvReleaseImage(t->out);
+    cvReleaseImage(&t->b);
+    cvReleaseImage(&t->g);
+    cvReleaseImage(&t->r);
+    cvReleaseImage(&t->b1);
+    cvReleaseImage(&t->g1);
+    cvReleaseImage(&t->r1);
+    cvReleaseImage(&t->l1);
+    cvReleaseImage(&t->invl);
+    cvReleaseImage(&t->out);
 
     free(*tmap);
     tmap = NULL;
@@ -98,6 +99,10 @@ void ToneMapColorRestoration(ToneMapImage *tmap)
     r2 = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
     g2 = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
     b2 = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
+
+    cvMul(tmap->r, tmap->invl, tmap->r1, 1);
+    cvMul(tmap->g, tmap->invl, tmap->g1, 1);
+    cvMul(tmap->b, tmap->invl, tmap->b1, 1);
 
     cvMul(tmap->r1, tmap->l1, r2, 1);
     cvMul(tmap->g1, tmap->l1, g2, 1);
