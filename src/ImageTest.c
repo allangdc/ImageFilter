@@ -1,6 +1,7 @@
 #include "ImageTest.h"
 
 #include <stdio.h>
+#include <highgui.h>
 
 void PrintMatrix1ch(IplImage *image, int square, int cx, int cy)
 {
@@ -32,4 +33,11 @@ void PrintFloatMatrix1ch(IplImage *image, int square, int cx, int cy)
         printf("|\n");
     }
     printf("\n");
+}
+
+void ShowImage(IplImage *image, const char *title)
+{
+    cvNamedWindow(title, CV_WINDOW_AUTOSIZE);
+    cvSetWindowProperty(title, CV_WND_PROP_AUTOSIZE , CV_WINDOW_FULLSCREEN);
+    cvShowImage(title, image);
 }
