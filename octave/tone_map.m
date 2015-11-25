@@ -29,10 +29,10 @@ Lmax = 255;
 L1 = log(L * b * (a-1) + 1) / log(a);
 
 %To low lightness processing, we use the following equation
-L1 = log(L/Lmax * (a-1) + 1) / log(a) * 255;
+%L1 = log(L/Lmax * (a-1) + 1) / log(a) * 255;
 
 %To high lightness processing, we use the following equation
-%L1 = (a.^(L/255) - 1) / (a-1) * Lmax;
+%L1 = (a.^(L/Lmax) - 1) / (a-1) * Lmax;
 
 R2 = R1 .* L1;
 G2 = G1 .* L1;

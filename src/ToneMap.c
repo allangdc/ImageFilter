@@ -3,6 +3,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "ImageTest.h"
+
 ToneMapImage *ToneMapCreate(IplImage *bgr_image)
 {
     ToneMapImage *tmap;
@@ -56,11 +58,11 @@ void ToneMapDestroy(ToneMapImage **tmap)
 
 void ToneMapLuminanceEnhancement(ToneMapImage *tmap)
 {
-    int lmax;
+    float lmax;
     IplImage *laux, *l;
     double aux;
     IplImage *ones;
-    int type = GENERAL;
+    int type = LOW;
 
     ones = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
     cvSet(ones, cvScalar(1,1,1,1), NULL);                   // set matrix with ones
@@ -69,7 +71,7 @@ void ToneMapLuminanceEnhancement(ToneMapImage *tmap)
     laux = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
     l = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
     cvAddWeighted(tmap->r, 0.27, tmap->g, 0.67, 0, laux);
-    cvAddWeighted(laux, 1, tmap->b, 0.06, 0, l);            // l=0.27R + 0.67*G + 0.06B
+    cvAddWeighted(laux, 1, tmap->b, 0.06, 0, l);            // l=0.27R + 0.67G + 0.06B
 
     cvDiv(ones, l, tmap->invl, 1);                          // inv(l) = 1 / l
 
@@ -81,8 +83,14 @@ void ToneMapLuminanceEnhancement(ToneMapImage *tmap)
         cvMul(tmap->l1, ones, tmap->l1, aux);                           // l1 = l1 / ln(A);
         break;
     case LOW:
+        cvAddWeighted(l, 1/lmax * (tmap->alfa-1), ones, 1, 0, laux);    // laux = (L/Lmax)*(A-1)+1
+        cvLog(laux, tmap->l1);                                          // l1 = ln(laux)
+        aux  = 255 / log(tmap->alfa);
+        cvMul(tmap->l1, ones, tmap->l1, aux);                           // l1 = 255 * l1 / ln(A);
         break;
     case HIGH:
+        //%L1 = (a.^(L/Lmax) - 1) / (a-1) * Lmax;
+
         break;
     default:
         break;

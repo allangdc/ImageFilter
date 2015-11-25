@@ -19,6 +19,7 @@ add_executable( ${PROJECT_NAME} main.c
                                 ImageIO.c
                                 svlm.c
                                 ToneMap.c
+                                ImageTest.c
                                 GA/GAGene.c)
 
 target_link_libraries( ${PROJECT_NAME} ${OpenCV_LIBS} )
