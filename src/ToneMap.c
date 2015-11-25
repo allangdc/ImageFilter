@@ -5,15 +5,14 @@
 
 #include "ImageTest.h"
 
-ToneMapImage *ToneMapCreate(IplImage *bgr_image)
+ToneMapImage *ToneMapCreate(IplImage *bgr_image, int type, float alpha)
 {
     ToneMapImage *tmap;
     IplImage *bgr32;
 
-    int type = GENERAL;
-
     tmap = (ToneMapImage *) malloc(sizeof(ToneMapImage));
-    tmap->alfa = 10;
+    tmap->filter_type = type;
+    tmap->alfa = alpha;
     tmap->beta = 10;
     tmap->size = cvGetSize(bgr_image);
 
@@ -62,7 +61,6 @@ void ToneMapLuminanceEnhancement(ToneMapImage *tmap)
     IplImage *laux, *l;
     double aux;
     IplImage *ones;
-    int type = LOW;
 
     ones = cvCreateImage(tmap->size, IPL_DEPTH_32F, 1);
     cvSet(ones, cvScalar(1,1,1,1), NULL);                   // set matrix with ones
@@ -75,8 +73,9 @@ void ToneMapLuminanceEnhancement(ToneMapImage *tmap)
 
     cvDiv(ones, l, tmap->invl, 1);                          // inv(l) = 1 / l
 
-    switch (type) {
+    switch (tmap->filter_type) {
     case GENERAL:
+        //@TODO: GENERAL has problem, not use
         cvAddWeighted(l, tmap->beta*(tmap->alfa-1), ones, 1, 0, laux);  // laux = L*B*(A-1)+1
         cvLog(laux, tmap->l1);                                          // l1 = ln(laux)
         aux  = 1 / log(tmap->alfa);
@@ -90,7 +89,12 @@ void ToneMapLuminanceEnhancement(ToneMapImage *tmap)
         break;
     case HIGH:
         //%L1 = (a.^(L/Lmax) - 1) / (a-1) * Lmax;
-
+        cvMul(l, ones, laux, 1/lmax);                   // laux = (L/LMax);
+        cvMul(laux, ones, laux, log(tmap->alfa));       // laux = laux * ln(a);
+        cvExp(laux, laux);                              // laux = e^(laux*ln(a)) = a^laux
+        cvSub(laux, ones, laux, NULL);                  // laux = a^laux-1
+        aux = lmax/(tmap->alfa-1);
+        cvMul(laux, ones, tmap->l1, aux);               //(a^(L/Lmax))*Lmax/(a-1)
         break;
     default:
         break;
@@ -125,7 +129,7 @@ void ToneMapColorRestoration(ToneMapImage *tmap)
 
 void ToneMapFilter(IplImage *src, IplImage *dst)
 {
-    ToneMapImage *tmap = ToneMapCreate(src);
+    ToneMapImage *tmap = ToneMapCreate(src, LOW, 10);
     ToneMapLuminanceEnhancement(tmap);
     ToneMapColorRestoration(tmap);
     cvConvertScale(tmap->out, dst, 1, 0);

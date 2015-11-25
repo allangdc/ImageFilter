@@ -17,9 +17,10 @@ typedef struct tonemapimage
     float       alfa, beta;
     IplImage    *l1, *invl;
     IplImage    *out;
+    int         filter_type;
 } ToneMapImage;
 
-ToneMapImage *ToneMapCreate(IplImage *bgr_image);
+ToneMapImage *ToneMapCreate(IplImage *bgr_image, int type, float alpha);
 void ToneMapDestroy(ToneMapImage **tmap);
 void ToneMapFilter(IplImage *src, IplImage *dst);
 void ToneMapLuminanceEnhancement(ToneMapImage *tmap);
