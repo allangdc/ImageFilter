@@ -38,6 +38,8 @@ H = exp(-gaussianNumerator./(2*sigma.^2));
 H = 1 - H;
 H1 = H;
 
+%An Algorithm for Repairing Low-Quality Video Enhancement Techniques Based on Trained Filter
+
 H = fftshift(H);
 
 If = fft2(I, M, N);

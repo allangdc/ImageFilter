@@ -53,25 +53,26 @@ int main(int argc, char **argv)
 	int x;
 
 	double diff = 0;
-    for(x=0; x<1; x++)
+    for(x=0; x<100; x++)
 	{
 		clock_t start = clock();
         SvlmFilter(img_in_a, out1);
-        ToneMapFilter(img_in_a, out2);
+        //ToneMapFilter(img_in_a, out2);
 		clock_t stop = clock();
 		diff += (stop - start) / (double) (CLOCKS_PER_SEC);
 	}
 	printf("\nTIME = %lf\n", diff);
     ShowImage(img_in_a, "Original");
     ShowImage(out1, "SVLM");
-    ShowImage(out2, "ToneMapping");
+    //ShowImage(out2, "ToneMapping");
 	cvWaitKey(0);
 
 
 	//VideoImage();
 	
-	//TIME = 189.554687
-	//TIME = 0.194058
+    //in 100 convertions
+    //TIME = 3.944358   -> ToneMapping
+    //TIME = 27.485970  -> SVLM
 
 
 	printf("\n\n ***FIM***\n");
